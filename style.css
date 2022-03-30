@@ -222,6 +222,6 @@ body {
   color: #858585;
   transition: color 500ms ease;
 }
-.modal {
+.myModalInput {
   display: none;
 }

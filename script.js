@@ -11,6 +11,7 @@ let clickedDate = null;
 let largestEventId = 0;
 var arr = [];
 var main_event_id = 1;
+var modal1;
 
 let structureCalendar = createElement("div", window.root, { id: "structureCalendar" });
 let calendarHeader = createElement("header", structureCalendar, {});
@@ -28,13 +29,13 @@ let modalMainDiv = createElement("div", window.body, { id: "myModal", className:
 let modalDialogDisplay = createElement("div", modalMainDiv, { className: "modal-dialog" });
 let modalContentDisplay = createElement("div", modalDialogDisplay, { className: "modal-content" });
 let modalHeaderDisplay = createElement("div", modalContentDisplay, { className: "modal-header" });
-let modalTitle = createElement("h5", modalHeaderDisplay, { className: "modal-title", textContent: "Modal title" });
+var modalTitle = createElement("h5", modalHeaderDisplay, { className: "modal-title", textContent: "Modal title" });
 let closeIconDisplay = createElement("button", modalHeaderDisplay, { type: "button", className: "btn-close" }, { bsDismiss: "modal" });
 let modalBodyDisplay = createElement("div", modalContentDisplay, { className: "modal-body" });
-let para = createElement("p", modalBodyDisplay, { textContent: "text in modal" });
+var para = createElement("p", modalBodyDisplay, { textContent: "text in modal" });
 let modalFooterDisplay = createElement("div", modalContentDisplay, { className: "modal-footer" });
-let closeButtonDisplay = createElement("button", modalFooterDisplay, { type: "button", className: "btn btn-secondary", textContent: "close" }, { bsDismiss: "modal" });
-let saveButtonDisplay = createElement("button", modalFooterDisplay, { type: "button", className: "btn btn-primary", textContent: "save Changes" });
+var editButton = createElement("button", modalFooterDisplay, { type: "button", className: "btn btn-secondary", textContent: "Edit" }, { content: "" });
+var deleteButton = createElement("button", modalFooterDisplay, { type: "button", className: "btn btn-danger", textContent: "Delete", id: "del_" + main_event_id }, { content: "" });
 
 let modalDiv = createElement("div", window.body, { id: "myModalInput", className: "modal" });
 let modalDialog = createElement("div", modalDiv, { className: "modal-dialog" });
@@ -57,6 +58,26 @@ var eventDescription = createElement("textarea", textAreaDiv, { type: "text", cl
 let modalFooter = createElement("div", modalContent, { className: "modal-footer" });
 let closeButton = createElement("button", modalFooter, { type: "button", className: "btn btn-secondary", textContent: "close" }, { bsDismiss: "modal" });
 let saveButton = createElement("button", modalFooter, { type: "button", className: "btn btn-primary", textContent: "save Changes", id: "saveButton" });
+
+let editModalDiv = createElement("div", window.body, { id: "editModalInput", className: "modal" });
+let editModalDialog = createElement("div", editModalDiv, { className: "modal-dialog" });
+let editModalContent = createElement("div", editModalDialog, { className: "modal-content" });
+let editModalHeader = createElement("div", editModalContent, { className: "modal-header" });
+let edit_h5 = createElement("h5", editModalHeader, { className: "modal-title", id: "exampleModalLabel", textContent: "Edit Event" });
+let editCloseIcon = createElement("button", editModalHeader, { type: "button", className: "btn-close" }, { bsDismiss: "modal" });
+let editModalBody = createElement("div", editModalContent, { className: "modal-body" });
+let edit_form = createElement("form", editModalBody, { id: "addEvent" });
+var editDateInput = createElement("input", edit_form, { type: "hidden", id: "Edit_date" });
+let edit_idInput = createElement("input", edit_form, { type: "hidden", id: "editindex" });
+let edit_inputDiv = createElement("div", edit_form, { className: "mb-3" });
+let Edit_inputLable = createElement("label", edit_inputDiv, { className: "col-form-label", textContent: "Event Name" });
+var edit_eventInput = createElement("input", edit_inputDiv, { type: "text", className: "form-control", id: "edit_event-name", name: "input" });
+let edit_textAreaDiv = createElement("div", edit_form, { className: "mb-3" });
+let edit_textAreaLable = createElement("label", edit_textAreaDiv, { className: "col-form-label", textContent: "Event Description" });
+var edit_eventDescription = createElement("textarea", edit_textAreaDiv, { type: "text", className: "form-control", id: "edit_event-description", name: "inputD" });
+let editModalFooter = createElement("div", editModalContent, { className: "modal-footer" });
+let edit_closeButton = createElement("button", editModalFooter, { type: "button", className: "btn btn-secondary", textContent: "close" }, { bsDismiss: "modal" });
+var edit_saveButton = createElement("button", editModalFooter, { type: "button", className: "btn btn-primary", textContent: "save Changes", id: "saveButton" });
 
 showCalendar(currentMonth, currentYear);
 
@@ -89,9 +110,8 @@ function showCalendar(month, year) {
           clickedDate = "";
           let event_date = this.dataset.year + "/" + this.dataset.month + "/" + this.dataset.date;
           dateInput.value = event_date;
-          var myModalEl = document.querySelector("#myModalInput");
-          var modal = bootstrap.Modal.getOrCreateInstance(myModalEl);
-          modal.show();
+          modal1 = bootstrap.Modal.getOrCreateInstance(modalDiv);
+          modal1.show();
         });
 
         if (typeof eventData !== "undefined") {
@@ -99,10 +119,6 @@ function showCalendar(month, year) {
         }
         if (date === today.getDate() && year === today.getFullYear() && month === today.getMonth()) {
           li.className = "today";
-          // let day = `${today.getDate()<10? "0" : ""}${today.getDate()}`;
-          // let month = `${(today.getMonth()+1)< 10 ? "0":""}${today.getDate()}`;
-          // let year = `${today.getFullYear()<10? "0" : ""}${today.getDate()}`;
-          // date.textContent = `${year}/${month}/${year}`;
         }
         date++;
       }
@@ -126,10 +142,15 @@ function viewEvents(data, where, args) {
           eventContainer = createElement("div", where, {});
         }
         firstEventOfTheDay = false;
-        let event = createElement("div", eventContainer, { className: "ev", id: item.id, title: item.title });
+        let eventElem = createElement("div", eventContainer, { className: "ev", id: item.id, title: item.title });
 
         // Show Modal on Clicking Event Dot, Modal should Contain Event Title, Details and Date
-        event.addEventListener("click", function () {
+        eventElem.addEventListener("click", function () {
+          event.stopPropagation();
+          deleteButton.dataset.content = item.id;
+          editButton.dataset.content = item.id;
+          modalTitle.innerText = item.title;
+          para.innerText = item.content;
           clickedDate = "";
           var myModalElm = document.querySelector("#myModal");
           var modal = bootstrap.Modal.getOrCreateInstance(myModalElm);
@@ -197,13 +218,6 @@ btn.addEventListener("click", function () {
 
   eventData.push(obj);
 
-  //   let idOfEvent = document.getElementById("event_");
-  //   for (var i = 0; i < idOfEvent.length; i++) {
-  //     let identityOfEvent = idOfEvent[i].value;
-  //     obj = arr[i];
-  //     obj["id"] = identityOfEvent;
-  //   }
-
   console.log(eventData);
 
   localStorage.setItem("eventData", JSON.stringify(eventData));
@@ -212,11 +226,10 @@ btn.addEventListener("click", function () {
   showCalendar(currentMonth, currentYear);
 
   main_event_id++;
-
-  // localStorage.setItem("Title", document.getElementById("event-name").value);
-  // localStorage.setItem("Description", document.getElementById("message-text").value);
-  //renderArray(eventArray);
+  let temp_modal = bootstrap.Modal.getInstance(modalDiv);
+  temp_modal.hide();
 });
+
 document.addEventListener("DOMContentLoaded", function () {
   let dataSave = localStorage.getItem("eventData");
   dataSave = JSON.parse(dataSave);
@@ -227,4 +240,52 @@ document.addEventListener("DOMContentLoaded", function () {
     main_event_id = eventData[eventData.length - 1].id + 1;
     showCalendar(currentMonth, currentYear);
   }
+});
+
+//const delBtn = document.getElementById("del");
+deleteButton.addEventListener("click", function () {
+  // console.log(deleteButton);
+  let id = event.target.dataset.content;
+  let foundIndex = eventData.findIndex((item) => parseInt(item.id) == parseInt(id));
+  eventData.splice(foundIndex, 1);
+  localStorage.setItem("eventData", JSON.stringify(eventData));
+  showCalendar(currentMonth, currentYear);
+
+  let temp_modal = bootstrap.Modal.getInstance(modalMainDiv);
+  temp_modal.hide();
+});
+
+editButton.addEventListener("click", function () {
+  var myModalElement = document.querySelector("#editModalInput");
+  var modal = bootstrap.Modal.getOrCreateInstance(myModalElement);
+  modal.show();
+  let id = event.target.dataset.content; // edit_idInput.value
+  let foundIndex = eventData.findIndex((item) => parseInt(item.id) == parseInt(id));
+  let editValue = eventData[foundIndex];
+
+  edit_idInput.value = editValue.id;
+  editDateInput.value = editValue.date;
+  edit_eventInput.value = editValue.title;
+  edit_eventDescription.value = editValue.content;
+  //editValue.content = edit_eventDescription;
+
+  let edit_modal = bootstrap.Modal.getInstance(modalMainDiv);
+  edit_modal.hide();
+});
+
+edit_saveButton.addEventListener("click", function () {
+  let id = edit_idInput.value;
+
+  let foundIndex = eventData.findIndex((item) => parseInt(item.id) == parseInt(id));
+  let editValue = eventData[foundIndex];
+
+  editValue.title = edit_eventInput.value;
+  edit_eventInput.value = "";
+  editValue.content = edit_eventDescription.value;
+  edit_eventDescription.value = "";
+
+  localStorage.setItem("eventData", JSON.stringify(eventData));
+
+  let edit_modal = bootstrap.Modal.getInstance(editModalInput);
+  edit_modal.hide();
 });
